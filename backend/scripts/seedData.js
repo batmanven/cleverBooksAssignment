@@ -25,7 +25,6 @@ const Notification = require('../src/models/Notification');
 
 const COURIER_PARTNERS = ['shiprocket', 'delhivery', 'bluedart', 'dtdc', 'ekart'];
 const MERCHANTS = ['MERCH001', 'MERCH002', 'MERCH003', 'MERCH004', 'MERCH005'];
-const ORDER_STATUSES = ['DELIVERED', 'RTO', 'IN_TRANSIT', 'LOST'];
 const BATCH_ID = 'BATCH-2026-04-001';
 const DUPLICATE_BATCH_ID = 'BATCH-2026-04-002';
 
@@ -111,9 +110,6 @@ function generateOrders() {
 function generateSettlements(orders) {
   const settlements = [];
 
-  // ===========================================
-  // CLEAN / MATCHED Records (orders 1-23)
-  // ===========================================
   for (let i = 0; i < 23; i++) {
     const order = orders[i];
     settlements.push({
@@ -147,10 +143,8 @@ function generateSettlements(orders) {
     });
   }
 
-  // ===========================================
   // WEIGHT DISPUTE (orders 29-32 → 4 records)
   // Rule 2: chargedWeight > declaredWeight × 1.10
-  // ===========================================
   for (let i = 28; i < 32; i++) {
     const order = orders[i];
     const inflatedWeight = Math.round(order.declaredWeight * randomBetween(1.2, 1.8) * 10) / 10;
@@ -166,10 +160,8 @@ function generateSettlements(orders) {
     });
   }
 
-  // ===========================================
   // PHANTOM RTO CHARGE (orders 33-35 → 3 records)
   // Rule 3: rtoCharge > 0 but orderStatus = DELIVERED
-  // ===========================================
   for (let i = 32; i < 35; i++) {
     const order = orders[i]; // These are DELIVERED
     settlements.push({
@@ -184,17 +176,8 @@ function generateSettlements(orders) {
     });
   }
 
-  // ===========================================
   // OVERDUE REMITTANCE — orders 49-51 have no settlement
   // Rule 4: deliveryDate > 14 days ago, no settlementDate
-  // We intentionally DO NOT create settlement records for these.
-  // ===========================================
-  // (No settlements created for orders[48], orders[49], orders[50])
-
-  // ===========================================
-  // DUPLICATE SETTLEMENT (orders 1-2 in a SECOND batch)
-  // Rule 5: same awbNumber in different batchId
-  // ===========================================
   for (let i = 0; i < 2; i++) {
     const order = orders[i];
     settlements.push({
@@ -209,17 +192,14 @@ function generateSettlements(orders) {
     });
   }
 
-  // ===========================================
-  // Some RTO orders with correct RTO charges (should match)
-  // ===========================================
   for (let i = 35; i < 40; i++) {
-    const order = orders[i]; // RTO orders
+    const order = orders[i];
     settlements.push({
       awbNumber: order.awbNumber,
-      settledCodAmount: 0, // RTO — no COD collected
+      settledCodAmount: 0,
       chargedWeight: order.declaredWeight,
       forwardCharge: randomBetween(30, 100),
-      rtoCharge: randomBetween(30, 100), // RTO charge is expected for RTO orders
+      rtoCharge: randomBetween(30, 100),
       codHandlingFee: 0,
       settlementDate: daysAgo(Math.floor(Math.random() * 5)),
       batchId: BATCH_ID,
@@ -232,12 +212,11 @@ function generateSettlements(orders) {
 async function seed() {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/cleverbooks';
-    console.log(`\n🔗 Connecting to MongoDB: ${mongoUri}`);
+    console.log(`\nConnecting to MongoDB: ${mongoUri}`);
     await mongoose.connect(mongoUri);
-    console.log('✅ Connected to MongoDB\n');
+    console.log('Connected to MongoDB\n');
 
-    // Clear existing data
-    console.log('🗑️  Clearing existing data...');
+    console.log('Clearing existing data...');
     await Order.deleteMany({});
     await Settlement.deleteMany({});
     await ReconciliationJob.deleteMany({});
@@ -250,16 +229,12 @@ async function seed() {
     await Order.insertMany(orders);
     console.log('   Done.\n');
 
-    // Generate and insert settlements
     const settlements = generateSettlements(orders);
-    console.log(`💰 Inserting ${settlements.length} settlement records...`);
+    console.log(`Inserting ${settlements.length} settlement records...`);
     await Settlement.insertMany(settlements);
     console.log('   Done.\n');
 
-    // Summary
-    console.log('═══════════════════════════════════════════');
-    console.log('📊 Seed Data Summary');
-    console.log('═══════════════════════════════════════════');
+    console.log('Seed Data Summary');
     console.log(`   Orders created:           ${orders.length}`);
     console.log(`   Settlements created:       ${settlements.length}`);
     console.log('');
@@ -274,12 +249,12 @@ async function seed() {
     console.log(`   Batch IDs: ${BATCH_ID}, ${DUPLICATE_BATCH_ID}`);
     console.log(`   Merchants: ${MERCHANTS.join(', ')}`);
     console.log(`   Couriers:  ${COURIER_PARTNERS.join(', ')}`);
-    console.log('═══════════════════════════════════════════\n');
+    console.log('\n');
 
-    console.log('✅ Seed data generation complete!');
+    console.log('Seed data generation complete!');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Seed failed:', error);
+    console.error('Seed failed:', error);
     process.exit(1);
   }
 }
