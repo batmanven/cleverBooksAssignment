@@ -71,6 +71,7 @@ async function uploadSettlements(req, res, next) {
           },
           { upsert: true },
         );
+
         const existing = await Settlement.findOne({
           awbNumber: record.awbNumber,
           batchId,
@@ -142,6 +143,7 @@ async function listSettlements(req, res, next) {
     const pageNum = Math.max(1, parseInt(page, 10));
     const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
     const skip = (pageNum - 1) * limitNum;
+
     const pipeline = [
       { $match: filter },
       {
@@ -195,7 +197,6 @@ async function getSettlementsSummary(req, res, next) {
   try {
     const [statusCounts, courierBreakdown, totalDiscrepancyValue] =
       await Promise.all([
-        // Count by status
         Settlement.aggregate([
           {
             $group: {
@@ -205,7 +206,6 @@ async function getSettlementsSummary(req, res, next) {
           },
         ]),
 
-        // Discrepancies by courier
         Settlement.aggregate([
           { $match: { status: "DISCREPANCY" } },
           {
@@ -254,7 +254,7 @@ async function getSettlementsSummary(req, res, next) {
                     {
                       $subtract: [
                         { $ifNull: ["$order.codAmount", 0] },
-                        "$settledCodAmount",
+                        { $ifNull: ["$settledCodAmount", 0] },
                       ],
                     },
                     0,
@@ -265,7 +265,7 @@ async function getSettlementsSummary(req, res, next) {
                 $sum: {
                   $cond: [
                     { $eq: ["$order.orderStatus", "DELIVERED"] },
-                    "$rtoCharge",
+                    { $ifNull: ["$rtoCharge", 0] },
                     0,
                   ],
                 },
@@ -276,11 +276,13 @@ async function getSettlementsSummary(req, res, next) {
       ]);
 
     const statusMap = { PENDING_REVIEW: 0, MATCHED: 0, DISCREPANCY: 0 };
-    statusCounts.forEach(({ _id, count }) => {
-      statusMap[_id] = count;
-    });
+    if (statusCounts && statusCounts.length > 0) {
+      statusCounts.forEach(({ _id, count }) => {
+        if (_id) statusMap[_id] = count;
+      });
+    }
 
-    const discValue = totalDiscrepancyValue[0] || {
+    const discValue = (totalDiscrepancyValue && totalDiscrepancyValue[0]) || {
       totalCodeVariance: 0,
       totalExcessRtoCharges: 0,
     };
@@ -315,7 +317,6 @@ async function getSettlementDetail(req, res, next) {
       });
     }
 
-    // Get the matching order
     const order = await Order.findOne({ awbNumber: settlement.awbNumber });
 
     res.json({
@@ -342,7 +343,6 @@ async function exportSettlements(req, res, next) {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Build CSV
     const headers = [
       "AWB Number",
       "Batch ID",
