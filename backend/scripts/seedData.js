@@ -1,18 +1,13 @@
-/**
- * Seed Data Generator for CleverBooks
- * 
- * Generates:
- * - 50+ mock Order records across multiple merchants & courier partners
- * - 1 settlement batch (~40 records) with intentional discrepancies:
- *   - 5 COD short-remittances
- *   - 4 weight disputes
- *   - 3 phantom RTO charges
- *   - 3 overdue remittances (orders with no settlement)
- *   - 2 duplicate settlements
- *   - ~23 matched (clean) records
- *
- * Run: npm run seed
- */
+
+//  * - 50+ mock Order records across multiple merchants & courier partners
+//  * - 1 settlement batch (~40 records) with intentional discrepancies:
+//  *   - 5 COD short-remittances
+//  *   - 4 weight disputes
+//  *   - 3 phantom RTO charges
+//  *   - 3 overdue remittances 
+//  *   - 2 duplicate settlements
+//  *   - ~23 matched (clean) records
+
 
 const mongoose = require('mongoose');
 const path = require('path');

@@ -4,6 +4,12 @@ A MERN stack application designed for logistics intelligence. This system automa
 
 ---
 
+## Video Walkthrough
+
+**[Watch the 5-Minute Technical Demo](https://www.loom.com/share/e0d97cbb98c34bc5a20d951e2a6b5f74)**
+
+---
+
 ## 1. Getting Started
 
 ### Prerequisites
@@ -40,13 +46,13 @@ docker-compose up -d
 
 ## 2. System Architecture and Design Decisions
 
-### Decoupled Worker Pattern
+### Decoupled Worker Pattern & Stateless Scalability
 
 A critical requirement of this project was the decoupling of reconciliation logic from notification delivery. We utilized **BullMQ and Redis** to implement a robust producer-consumer pattern.
 
-- **Producer**: The Reconciliation Service identifies discrepancies and publishes an event to the `discrepancy-notifications` queue.
-- **Consumer**: A separate worker service processes this queue and handles the external API communication.
-  This architecture ensures that throughput issues or downtime with external notification providers do not block the core financial reconciliation process.
+- **The Decision**: Strictly separating the Reconciliation Engine (CPU/Business Logic) from the Notification Worker (I/O/External API).
+- **The Why**: Financial reconciliation systems must maintain high integrity. If an external notification provider (e.g., a merchant's webhook or email service) is down, it should **never** block the core financial audit.
+- **The Result**: By using a Redis-backed queue, the system achieves **Stateless Horizontal Scalability**. Additional worker nodes can be spun up during peak seasons to handle millions of alerts without impacting the performance of the reconciliation loop.
 
 ### Reliability and Idempotency
 

@@ -24,7 +24,7 @@ function startWorker() {
     async (job) => {
       const data = job.data;
       console.log(
-        `\n🔔 Processing notification: ${data.discrepancyType} for ${data.awbNumber} (attempt ${job.attemptsMade + 1})`,
+        `\nProcessing notification: ${data.discrepancyType} for ${data.awbNumber} (attempt ${job.attemptsMade + 1})`,
       );
 
       const existingNotification = await Notification.findOne({
