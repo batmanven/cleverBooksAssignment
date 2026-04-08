@@ -112,9 +112,23 @@ body {
   letter-spacing: 0.025em;
 }
 
-.badge-matched { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
-.badge-discrepancy { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-.badge-pending { background: rgba(139, 92, 246, 0.1); color: var(--pending); border: 1px solid rgba(139, 92, 246, 0.2); }
+.badge-matched {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-discrepancy {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-pending {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--pending);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
 
 /* Table styling */
 .table-container {
@@ -148,8 +162,15 @@ tr:hover {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -210,7 +231,7 @@ tr:hover {
   :root {
     --sidebar-width: 80px;
   }
-  
+
   .sidebar {
     left: 0;
     z-index: 102;
@@ -221,7 +242,7 @@ tr:hover {
   :root {
     --sidebar-width: 70px;
   }
-  
+
   .sidebar {
     width: 70px !important;
     padding: 1.5rem 0.75rem;
