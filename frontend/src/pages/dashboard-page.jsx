@@ -18,13 +18,12 @@ const DashboardPage = () => {
         try {
             const [summaryRes, jobsRes] = await Promise.all([
                 api.get('/settlements/summary'),
-                api.get('/api/jobs', { params: { limit: 5 } }), // Should be /jobs but controller might be at /api/jobs or /api/reconciliation
+                api.get('/jobs', { params: { limit: 5 } }),
             ]);
             setSummary(summaryRes.data);
             setRecentJobs(jobsRes.data);
         } catch (err) {
             console.error('Failed to fetch dashboard data:', err);
-            // Fallback for jobs if path is different
             try {
                 const jobsRes = await api.get('/jobs', { params: { limit: 5 } });
                 setRecentJobs(jobsRes.data);
